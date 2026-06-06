@@ -671,3 +671,45 @@ body.win-big #machine { filter: drop-shadow(0 0 48px rgba(255,190,60,.75)) brigh
   color: var(--brass-hi);
   text-shadow: 0 0 10px rgba(243,221,142,.5);
 }
+
+/* ===== Loading：机器预热 ===== */
+#loader {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px;
+  background:
+    radial-gradient(120% 90% at 50% -10%, #2b2018 0%, transparent 55%),
+    radial-gradient(140% 120% at 50% 50%, transparent 50%, #000 125%),
+    var(--room);
+  transition: opacity .65s ease;
+}
+#loader.done { opacity: 0; pointer-events: none; }
+#ld-title {
+  font-family: var(--font-disp);
+  font-size: clamp(34px, 11vw, 52px);
+  letter-spacing: .06em;
+  background: linear-gradient(100deg, #b08a1e 15%, var(--brass-hi) 35%, #fffbe8 50%, var(--brass-hi) 65%, #b08a1e 85%);
+  background-size: 230% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 2px 1px #4a3a0c) drop-shadow(0 0 20px rgba(243,221,142,.35));
+  animation: goldflow 4s linear infinite;
+}
+#ld-sub {
+  font-size: 10px; letter-spacing: .34em; text-indent: .34em;
+  color: #8a7148;
+}
+#ld-bulbs { display: flex; gap: 10px; margin-top: 14px; }
+#ld-bulbs .bulb { width: 13px; height: 13px; }
+#ld-status {
+  margin-top: 4px;
+  font-size: 11px; letter-spacing: .22em; text-indent: .22em;
+  color: #6f5a3a;
+  animation: pulltag 1.8s ease-in-out infinite;
+}
+
+/* 揭幕：机器升起 */
+#machine.preload, #lever.preload { opacity: 0; transform: translateY(14px) scale(.97); }
+#machine, #lever { transition: opacity .7s ease, transform .7s cubic-bezier(.2, 1.3, .4, 1), filter .35s; }

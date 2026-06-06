@@ -2,9 +2,23 @@
 // AudioContext 必须在用户手势内 ensure()（iOS 限制）。
 let ac, master, whirrNode = null, bgmNode = null;
 const bufs = {};            // name → AudioBuffer（加载成功的素材）
+const raw = {};             // name → ArrayBuffer（loading 阶段预取，ensure 后解码）
 let loading = false;
 
 const SFX_FILES = ['coin', 'lever', 'spin', 'stop', 'bell', 'coins', 'jackpot'];
+const ALL_FILES = [...SFX_FILES.map(n => [n, `audio/sfx/${n}.mp3`]), ['bgm', 'audio/bgm.mp3']];
+
+// loading 阶段预取字节（无需 AudioContext）；onProgress(done, total)
+export function prefetch(onProgress = () => {}) {
+  let done = 0;
+  return Promise.all(ALL_FILES.map(([n, u]) =>
+    fetch(u)
+      .then(r => r.ok ? r.arrayBuffer() : null)
+      .then(b => { if (b) raw[n] = b; })
+      .catch(() => {})
+      .finally(() => onProgress(++done, ALL_FILES.length))
+  ));
+}
 
 export function ensure() {
   if (!ac) {
@@ -20,9 +34,9 @@ export function ensure() {
 
 async function loadOne(name, url) {
   try {
-    const res = await fetch(url);
-    if (!res.ok) return;
-    bufs[name] = await ac.decodeAudioData(await res.arrayBuffer());
+    // 预取过的直接解码（slice 防 decodeAudioData detach 原 buffer）
+    const bytes = raw[name] ? raw[name].slice(0) : await fetch(url).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    bufs[name] = await ac.decodeAudioData(bytes);
   } catch {}
 }
 
@@ -30,7 +44,7 @@ function loadAll() {
   if (loading) return;
   loading = true;
   for (const n of SFX_FILES) loadOne(n, `audio/sfx/${n}.mp3`);
-  // bgm 加载完且已解锁 → 立即起播（不等下一次手势）
+  // bgm 解码完且已解锁 → 立即起播（不等下一次手势）
   loadOne('bgm', 'audio/bgm.mp3').then(() => { if (ac.state === 'running') bgmStart(); });
 }
 

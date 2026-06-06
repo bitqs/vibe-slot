@@ -441,6 +441,45 @@ setInterval(() => {
   }
 }, 4000);
 
+// ---- Loading：字体 + 音频预取，灯泡进度，揭幕开玩 ----
+(function boot() {
+  const loader = $('loader');
+  const LDN = 9;
+  for (let i = 0; i < LDN; i++) {
+    const b = document.createElement('div');
+    b.className = 'bulb';
+    $('ld-bulbs').appendChild(b);
+  }
+  const ldBulbs = [...document.querySelectorAll('#ld-bulbs .bulb')];
+  // 进度单位：音频 8 件 + 字体 1 件 = 9
+  const TOTAL = 9;
+  let doneUnits = 0;
+  const bump = () => {
+    doneUnits++;
+    const lit = Math.round(doneUnits / TOTAL * LDN);
+    ldBulbs.forEach((b, i) => b.classList.toggle('on', i < lit));
+  };
+
+  const t0 = performance.now();
+  const tasks = [
+    audio.prefetch(bump),
+    (document.fonts?.ready || Promise.resolve()).then(bump),
+  ];
+  const timeout = new Promise(r => setTimeout(r, 8000)); // 兜底：慢网 8s 强行开玩（音频走合成回退）
+
+  Promise.race([Promise.all(tasks), timeout]).then(() => {
+    // 至少亮 600ms，别闪一下就没
+    const wait = Math.max(0, 600 - (performance.now() - t0));
+    setTimeout(() => {
+      ldBulbs.forEach(b => b.classList.add('on'));
+      loader.classList.add('done');
+      $('machine').classList.remove('preload');
+      $('lever').classList.remove('preload');
+      setTimeout(() => loader.remove(), 700);
+    }, wait);
+  });
+})();
+
 // ---- 调试钩子 ----
 if (location.search.includes('debug')) {
   window.VS = {
