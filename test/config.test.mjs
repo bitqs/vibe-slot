@@ -17,7 +17,7 @@ test('赔付表从高到低排序（首匹配生效的前提）', () => {
 test('经济/保底/时序常量存在', () => {
   for (const k of ['start', 'bet', 'loan']) assert.equal(typeof ECON[k], 'number');
   assert.equal(typeof PITY.losses, 'number');
-  for (const k of ['lockGap', 'spinMin', 'leverThreshold']) assert.equal(typeof T[k], 'number');
+  for (const k of ['lockGap', 'spinMin']) assert.equal(typeof T[k], 'number');
 });
 
 test('jackpot 海报素材仍齐：8 调色盘 + 8 算法名 + 8 运动', () => {

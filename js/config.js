@@ -34,8 +34,8 @@ export const PITY = {
   losses: 8,    // 连续空手 N 次后下次必中小奖（构造樱桃停位）
 };
 
-// 时序（ms）
-export const T = { lockGap: 450, spinMin: 1000, leverThreshold: 60 };
+// 时序（ms）。拉杆触发改为咬合点机制（main.js COMMIT），不再用像素阈值
+export const T = { lockGap: 450, spinMin: 1000 };
 
 // ===== v1 生成艺术（JACKPOT 777 头奖海报复用）=====
 export const ALGO_NAMES = ['流场', '粒子星云', '网格波', '分形枝', '噪声地形', '轨道环', '字符雨', '玻璃折射'];

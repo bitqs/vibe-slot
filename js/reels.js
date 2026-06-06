@@ -35,9 +35,9 @@ export class Reel {
     return this.stripEl.children[p + n];
   }
 
-  spin() {
+  spin(boost = 0) {
     this.state = 'spin';
-    this.v = 24 + Math.random() * 5; // 格/秒
+    this.v = 24 + boost + Math.random() * 5; // 格/秒；boost=猛拉奖励
     this.el.classList.add('blur');
   }
 

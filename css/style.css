@@ -341,10 +341,9 @@ body {
   position: absolute; left: 0; right: 0; top: 0; bottom: 30px;
   transform-origin: 50% 100%;
   transform: rotateX(calc(var(--pull, 0) * 1deg));
-  transition: transform .14s;
+  /* 无 transition：拖拽直跟手指，回弹由 JS 阻尼弹簧驱动 */
   will-change: transform;
 }
-#arm.snap { transition: transform .38s cubic-bezier(.2, 2.6, .4, 1); }
 #rod {
   position: absolute; left: 50%; top: 22px; bottom: 0;
   width: 9px; margin-left: -4.5px;

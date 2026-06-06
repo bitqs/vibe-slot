@@ -105,10 +105,16 @@ export function coin() {
   thud(4000, .03, .1);
 }
 
-// 拉杆棘轮齿（高频小事件，合成最跟手）
-export function ratchet() {
-  blip(820 + Math.random() * 160, .025, 'square', .09);
+// 拉杆棘轮齿（高频小事件，合成最跟手）。p=下拉深度 0..1，越深音高越紧
+export function ratchet(p = .5) {
+  blip(680 + p * 520 + Math.random() * 90, .025, 'square', .08 + p * .05);
   thud(2600, .02, .08);
+}
+
+// 过点咬合：机构"咬住"的沉重一声——过了这里松手必触发
+export function commitClick() {
+  blip(300, .05, 'square', .22);
+  thud(1100, .045, .4);
 }
 
 // 释放回弹

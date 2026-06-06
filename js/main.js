@@ -112,7 +112,7 @@ requestAnimationFrame(loop);
 // ---- 抽取流程 ----
 let state = 'idle';
 
-function startSpin(forcedStops) {
+function startSpin(forcedStops, boost = 0) {
   if (state === 'spin') return;
 
   if (save.coins < ECON.bet) {
@@ -140,7 +140,7 @@ function startSpin(forcedStops) {
 
   setTimeout(() => audio.whirrStart(), 60);
   $('reelbox').classList.add('lit');
-  reels.forEach(r => r.spin());
+  reels.forEach(r => r.spin(boost));
 
   let locked = 0;
   result.stops.forEach((stop, i) => {
@@ -301,56 +301,117 @@ function jackpot(win) {
   setTimeout(() => jp.addEventListener('pointerdown', dismiss), 1200);
 }
 
-// ---- 拉杆 ----
+// ---- 拉杆（核心交互：阻力曲线 + 咬合点 + 阻尼弹簧回摆 + 猛拉奖励） ----
 const lever = $('lever'), arm = $('arm');
-const MAXPULL = 120, MAXANG = 52;
-let drag = null;
+const MAXPULL = 130;       // 手指行程 px
+const MAXANG = 54;         // 杆臂最大角
+const COMMIT = .78;        // 咬合点：过此深度松手必触发
+let drag = null, springRaf = 0, lastActivity = performance.now();
+
+// 弹簧阻力：初段灵敏，末段渐重（同样指距换来的角度越来越少）
+const pullCurve = p => 1 - Math.pow(1 - p, 1.7);
+const setAng = a => arm.style.setProperty('--pull', a.toFixed(2));
+
+// 松手阻尼弹簧：过冲反向再衰减稳住（拟真金属杆回摆）
+function springBack(fromAng) {
+  cancelAnimationFrame(springRaf);
+  const t0 = performance.now();
+  const step = now => {
+    const t = (now - t0) / 1000;
+    const ang = fromAng * Math.exp(-7.5 * t) * Math.cos(15 * t);
+    setAng(Math.max(-7, ang));
+    if (t < .6) springRaf = requestAnimationFrame(step);
+    else setAng(0);
+  };
+  springRaf = requestAnimationFrame(step);
+}
+
+function fireLever(boost) {
+  audio.springRelease();
+  startSpin(undefined, boost);
+}
 
 lever.addEventListener('pointerdown', e => {
   try { lever.setPointerCapture(e.pointerId); } catch {}
-  drag = { y0: e.clientY, t0: performance.now(), notch: 0, dy: 0 };
+  cancelAnimationFrame(springRaf);
+  drag = { y0: e.clientY, t0: performance.now(), notch: 0, dy: 0, committed: false, vy: 0, lastY: e.clientY, lastT: performance.now() };
   lever.classList.add('held');
-  arm.classList.remove('snap');
   audio.ensure();
+  lastActivity = performance.now();
 });
+
 lever.addEventListener('pointermove', e => {
   if (!drag) return;
+  const now = performance.now();
+  // 测速（指数平滑）：松手时的拉速 = 猛拉奖励
+  const dt = Math.max(1, now - drag.lastT);
+  drag.vy = .7 * drag.vy + .3 * ((e.clientY - drag.lastY) / dt * 1000);
+  drag.lastY = e.clientY; drag.lastT = now;
+
   drag.dy = Math.max(0, Math.min(MAXPULL, e.clientY - drag.y0));
-  arm.style.setProperty('--pull', (drag.dy / MAXPULL * MAXANG).toFixed(1));
-  if (drag.dy - drag.notch > 15) {
-    audio.ratchet();
+  const p = drag.dy / MAXPULL;
+  // 咬合点：跨过瞬间机构"咬住"——重击声 + 2° 滑落卡位
+  if (!drag.committed && p >= COMMIT) {
+    drag.committed = true;
+    audio.commitClick();
+  }
+  setAng(MAXANG * pullCurve(p) + (drag.committed ? 2 : 0));
+  if (drag.dy - drag.notch > 14) {
+    audio.ratchet(p);
     drag.notch = drag.dy;
   }
 });
+
 function release() {
   if (!drag) return;
-  const { dy, t0 } = drag;
+  const { dy, t0, committed, vy } = drag;
   drag = null;
   lever.classList.remove('held');
-  const fire = dy >= T.leverThreshold || (performance.now() - t0 < 250 && dy < 8);
-  if (fire && state !== 'spin') {
-    // 点按也给完整拉杆动画
-    if (dy < 8) {
-      arm.style.setProperty('--pull', MAXANG);
-      setTimeout(() => { arm.classList.add('snap'); arm.style.setProperty('--pull', 0); }, 130);
-    } else {
-      arm.classList.add('snap');
-      arm.style.setProperty('--pull', 0);
-    }
-    audio.springRelease();
-    startSpin();
-  } else {
-    arm.classList.add('snap');
-    arm.style.setProperty('--pull', 0);
+  lastActivity = performance.now();
+  const p = dy / MAXPULL;
+  const tap = performance.now() - t0 < 250 && dy < 8;
+  const curAng = MAXANG * pullCurve(p) + (committed ? 2 : 0);
+
+  if (tap && state !== 'spin') {
+    // 点按：快速代拉一整程（120ms 下压 → 弹簧回摆）
+    const t1 = performance.now();
+    const down = now => {
+      const k = Math.min(1, (now - t1) / 120);
+      setAng(MAXANG * k);
+      if (k < 1) { springRaf = requestAnimationFrame(down); return; }
+      audio.commitClick();
+      springBack(MAXANG);
+      fireLever(2);
+    };
+    cancelAnimationFrame(springRaf);
+    springRaf = requestAnimationFrame(down);
+    return;
+  }
+
+  springBack(curAng);
+  if (committed && state !== 'spin') {
+    // 猛拉奖励：松手速度 → 转轴初速（300px/s 起步，每 200px/s +1 格/秒，封顶 6）
+    const boost = Math.max(0, Math.min(6, (vy - 300) / 200));
+    fireLever(boost);
   }
 }
 lever.addEventListener('pointerup', release);
 lever.addEventListener('pointercancel', () => {
+  if (!drag) return;
+  const ang = MAXANG * pullCurve(drag.dy / MAXPULL);
   drag = null;
   lever.classList.remove('held');
-  arm.classList.add('snap');
-  arm.style.setProperty('--pull', 0);
+  springBack(ang);
 });
+
+// 待机邀请：闲置 14s 杆子自己轻轻晃一下（勾你来拉）
+setInterval(() => {
+  if (drag || state === 'spin') return;
+  if (performance.now() - lastActivity > 14000) {
+    springBack(7);
+    lastActivity = performance.now();
+  }
+}, 4000);
 
 // ---- 调试钩子 ----
 if (location.search.includes('debug')) {
