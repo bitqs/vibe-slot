@@ -615,3 +615,42 @@ body.win-big #machine { filter: drop-shadow(0 0 48px rgba(255,190,60,.75)) brigh
   text-shadow: 0 -1px 0 rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.05);
   pointer-events: none;
 }
+
+/* ===== BIG WIN 砸屏庆祝 ===== */
+#bigwin {
+  position: fixed; inset: 0; z-index: 45;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+  opacity: 0;
+}
+#bigwin.show { opacity: 1; }
+.bw-title {
+  font-family: var(--font-disp);
+  font-size: clamp(52px, 17vw, 96px);
+  letter-spacing: .04em;
+  background: linear-gradient(100deg, #b08a1e 15%, var(--brass-hi) 35%, #fffbe8 50%, var(--brass-hi) 65%, #b08a1e 85%);
+  background-size: 230% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 3px 2px #4a3a0c) drop-shadow(0 0 28px rgba(255,210,90,.75)) drop-shadow(0 8px 22px rgba(0,0,0,.8));
+  animation: goldflow 2.2s linear infinite;
+  transform: scale(0);
+}
+#bigwin.show .bw-title {
+  animation: goldflow 2.2s linear infinite, bwslam .55s cubic-bezier(.18, 2.4, .4, 1) forwards;
+}
+@keyframes bwslam { to { transform: scale(1); } }
+.bw-amount {
+  font-size: clamp(30px, 10vw, 52px);
+  font-weight: bold; letter-spacing: .1em;
+  color: #fff;
+  text-shadow: 0 0 22px rgba(255,200,60,1), 0 3px 8px rgba(0,0,0,.9);
+  transform: scale(0);
+}
+#bigwin.show .bw-amount {
+  animation: bwslam .5s cubic-bezier(.18, 2.4, .4, 1) .18s forwards;
+}
+#bigwin.out { transition: opacity .45s; opacity: 0; }

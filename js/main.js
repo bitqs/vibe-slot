@@ -12,10 +12,10 @@ const reelEls = [...document.querySelectorAll('.reel')];
 const reels = reelEls.map((el, i) => new Reel(el, STRIPS[i]));
 
 // ---- 存档（容错：私密模式不崩） ----
-let save = { coins: ECON.start, debt: 0, pity: 0 };
+let save = { coins: ECON.start, debt: 0, pity: 0, pulls: 0 };
 try {
   const s = JSON.parse(localStorage.getItem('vibeslot') || 'null');
-  if (s && typeof s.coins === 'number') save = { coins: s.coins, debt: s.debt || 0, pity: s.pity || 0 };
+  if (s && typeof s.coins === 'number') save = { coins: s.coins, debt: s.debt || 0, pity: s.pity || 0, pulls: s.pulls || 0 };
 } catch {}
 function persist() { try { localStorage.setItem('vibeslot', JSON.stringify(save)); } catch {} }
 
@@ -126,10 +126,14 @@ function startSpin(forcedStops, boost = 0) {
 
   state = 'spin';
   save.coins -= ECON.bet;
+  save.pulls++;
   persist();
   countTo(save.coins);
   audio.coin();
   document.querySelectorAll('.pt-row.lit').forEach(r => r.classList.remove('lit'));
+
+  // 新手钩子：第 2 拉必中铃铛×3（首因效应——开局就尝到大的）
+  if (!forcedStops && save.pulls === 2) forcedStops = STRIPS.map(s => s.indexOf('B'));
 
   const result = forcedStops
     ? { stops: forcedStops, win: judge(lineOf(forcedStops)), nearMiss: false }
@@ -187,16 +191,40 @@ function settle({ win, nearMiss }) {
   if (win.id === 'jackpot') { jackpot(win); return; }
 
   const big = tier <= 2; // bar3/bell3 以上算大奖
-  audio.winBells(Math.max(2, 7 - tier));
+  audio.winBells(big ? 10 : Math.max(2, 7 - tier));
   audio.coinsCascade(Math.min(18, Math.ceil(win.pay / 10)));
   dropCoins(Math.min(24, Math.max(3, Math.round(win.pay / 8))));
-  bulbsFlash(big ? 'chase' : 'flash', big ? 2600 : 1500);
+  bulbsFlash(big ? 'chase' : 'flash', big ? 3400 : 1500);
   winFx(win, big);
+  if (big) bigWin(win);
   $('winpop').textContent = `+${win.pay}`;
   $('winpop').classList.remove('show');
   void $('winpop').offsetWidth;
   $('winpop').classList.add('show');
   countTo(save.coins);
+}
+
+// ---- BIG WIN 砸屏：流金大字 slam + 金额滚动 + 二段金币瀑布 ----
+function bigWin(win) {
+  const bw = $('bigwin'), amt = bw.querySelector('.bw-amount');
+  bw.classList.remove('show', 'out');
+  void bw.offsetWidth;
+  bw.classList.add('show');
+  // 金额从 0 滚到 pay
+  const t0 = performance.now();
+  const roll = now => {
+    const k = Math.min(1, (now - t0) / 900);
+    amt.textContent = `+${Math.round(win.pay * (1 - Math.pow(1 - k, 3)))}`;
+    if (k < 1) requestAnimationFrame(roll);
+  };
+  requestAnimationFrame(roll);
+  // 二段庆祝：0.9s 后再来一轮金币瀑布 + 飞币
+  setTimeout(() => {
+    audio.coinsCascade(14);
+    dropCoins(14);
+  }, 900);
+  setTimeout(() => bw.classList.add('out'), 2300);
+  setTimeout(() => bw.classList.remove('show', 'out'), 2900);
 }
 
 // ---- 中奖视觉爆点：payline 爆闪 + 符号弹跳 + 光芒轮 + 屏闪 + 抛物线金币 + 机柜光环 ----
