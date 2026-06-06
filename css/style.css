@@ -654,3 +654,20 @@ body.win-big #machine { filter: drop-shadow(0 0 48px rgba(255,190,60,.75)) brigh
   animation: bwslam .5s cubic-bezier(.18, 2.4, .4, 1) .18s forwards;
 }
 #bigwin.out { transition: opacity .45s; opacity: 0; }
+
+/* 作者署名（黄铜小牌，链到 GitHub） */
+#about {
+  position: fixed; left: 50%; bottom: max(6px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  padding: 5px 12px;
+  font-size: 9.5px; letter-spacing: .28em; text-indent: .28em;
+  color: #8a7148;
+  text-decoration: none;
+  text-shadow: 0 1px 0 rgba(0,0,0,.7);
+  z-index: 20;
+  transition: color .2s, text-shadow .2s;
+}
+#about:hover, #about:active {
+  color: var(--brass-hi);
+  text-shadow: 0 0 10px rgba(243,221,142,.5);
+}
