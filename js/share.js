@@ -5,7 +5,6 @@ const URL_FULL = 'https://vibe-slot.pages.dev';
 const URL_SHOW = 'vibe-slot.pages.dev';
 
 let shareBlob = null;
-let built = false;
 
 function drawQR(x, ox, oy, size) {
   const m = qrMatrix(URL_FULL), n = m.length;
@@ -38,7 +37,7 @@ function spaced(x, t, cx, y, ls) {
   x.textAlign = ta;
 }
 
-export async function buildShareCard() {
+export async function buildShareCard(stats) {
   const cv = document.getElementById('shareCanvas');
   const x = cv.getContext('2d');
   const W = cv.width, H = cv.height;                // 1080×1920
@@ -86,8 +85,8 @@ export async function buildShareCard() {
   const img = new Image();
   img.src = 'assets/shot.jpg';
   await img.decode().catch(() => {});
-  const iw = 560, ih = iw * (img.naturalHeight || 800) / (img.naturalWidth || 390);
-  const ix = (W - iw) / 2, iy = 268;
+  const iw = 500, ih = iw * (img.naturalHeight || 800) / (img.naturalWidth || 390);
+  const ix = (W - iw) / 2, iy = 262;
   x.save();
   roundRect(x, ix, iy, iw, ih, 20);
   x.clip();
@@ -98,12 +97,34 @@ export async function buildShareCard() {
   roundRect(x, ix - 3, iy - 3, iw + 6, ih + 6, 22);
   x.stroke();
 
+  // 战绩三栏：拉杆 / 最大单中 / 净胜（负数=给老板娘打工）
+  const sy = iy + ih + 86;
+  const cols = [
+    [String(stats?.pulls ?? 0), '拉杆'],
+    [String(stats?.maxWin ?? 0), '最大单中'],
+    [String(stats?.net ?? 0), '净胜'],
+  ];
+  cols.forEach((c, i) => {
+    const cx = W * (.25 + .25 * i);
+    x.fillStyle = c[1] === '净胜' && (stats?.net ?? 0) < 0 ? '#c97f5e' : '#ffd95e';
+    x.font = "bold 56px 'Cutive Mono', monospace";
+    x.fillText(c[0], cx, sy);
+    x.fillStyle = '#8a7148';
+    x.font = "24px 'Cutive Mono', monospace";
+    spaced(x, c[1], cx, sy + 42, 4);
+  });
+  x.strokeStyle = 'rgba(243,221,142,.2)';
+  x.lineWidth = 1;
+  [W * .375, W * .625].forEach(lx => {
+    x.beginPath(); x.moveTo(lx, sy - 48); x.lineTo(lx, sy + 36); x.stroke();
+  });
+
   // 扫码区
-  const qy = iy + ih + 56;
+  const qy = sy + 110;
   x.fillStyle = '#efe3cb';
   x.font = "34px 'Cutive Mono', monospace";
   spaced(x, '扫 码 来 拉 一 把', W / 2, qy, 6);
-  const qs = 270;
+  const qs = 250;
   x.save();
   roundRect(x, (W - qs) / 2, qy + 28, qs, qs, 14);
   x.clip();
@@ -113,15 +134,13 @@ export async function buildShareCard() {
   x.font = "26px 'Cutive Mono', monospace";
   spaced(x, URL_SHOW, W / 2, qy + qs + 84, 5);
 
-  built = true;
   shareBlob = null;
   cv.toBlob(b => { shareBlob = b; }, 'image/png');  // 提前缓存：保存点击留在手势栈内（iOS）
 }
 
-export async function openShare() {
-  const ov = document.getElementById('share');
-  ov.classList.add('show');
-  if (!built) await buildShareCard();
+export async function openShare(stats) {
+  document.getElementById('share').classList.add('show');
+  await buildShareCard(stats);                      // 每次重画：战绩随时在变
 }
 
 export function closeShare() {

@@ -20,11 +20,21 @@ export function prefetch(onProgress = () => {}) {
   ));
 }
 
+let muted = false;
+try { muted = localStorage.getItem('vibeslot-muted') === '1'; } catch {}
+
+export function setMuted(m) {
+  muted = m;
+  try { localStorage.setItem('vibeslot-muted', m ? '1' : '0'); } catch {}
+  if (master) master.gain.value = m ? 0 : .55;
+}
+export function isMuted() { return muted; }
+
 export function ensure() {
   if (!ac) {
     ac = new (window.AudioContext || window.webkitAudioContext)();
     master = ac.createGain();
-    master.gain.value = .55;
+    master.gain.value = muted ? 0 : .55;
     master.connect(ac.destination);
     loadAll();
   }

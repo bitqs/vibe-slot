@@ -13,10 +13,11 @@ const reelEls = [...document.querySelectorAll('.reel')];
 const reels = reelEls.map((el, i) => new Reel(el, STRIPS[i]));
 
 // ---- 存档（容错：私密模式不崩） ----
-let save = { coins: ECON.start, debt: 0, pity: 0, pulls: 0 };
+let save = { coins: ECON.start, debt: 0, pity: 0, pulls: 0, maxWin: 0 };
 try {
   const s = JSON.parse(localStorage.getItem('vibeslot') || 'null');
-  if (s && typeof s.coins === 'number') save = { coins: s.coins, debt: s.debt || 0, pity: s.pity || 0, pulls: s.pulls || 0 };
+  if (s && typeof s.coins === 'number')
+    save = { coins: s.coins, debt: s.debt || 0, pity: s.pity || 0, pulls: s.pulls || 0, maxWin: s.maxWin || 0 };
 } catch {}
 function persist() { try { localStorage.setItem('vibeslot', JSON.stringify(save)); } catch {} }
 
@@ -180,6 +181,7 @@ function settle({ win, nearMiss }) {
   }
   save.pity = 0;
   save.coins += win.pay;
+  if (win.pay > save.maxWin) save.maxWin = win.pay;
   persist();
 
   const tier = PAYTABLE.findIndex(p => p.id === win.id); // 0=jackpot
@@ -442,10 +444,21 @@ setInterval(() => {
   }
 }, 4000);
 
-// ---- 分享 ----
-$('sharebtn').addEventListener('click', () => { audio.ensure(); openShare(); });
+// ---- 分享（带战绩） ----
+$('sharebtn').addEventListener('click', () => {
+  audio.ensure();
+  openShare({ pulls: save.pulls, maxWin: save.maxWin, net: save.coins - save.debt - ECON.start });
+});
 $('shClose').addEventListener('click', closeShare);
 $('shSave').addEventListener('click', saveShareImage);
+
+// ---- 静音 ----
+const muteBtn = $('mutebtn');
+muteBtn.classList.toggle('off', audio.isMuted());
+muteBtn.addEventListener('click', () => {
+  audio.setMuted(!audio.isMuted());
+  muteBtn.classList.toggle('off', audio.isMuted());
+});
 
 // ---- Loading：字体 + 音频预取，灯泡进度，揭幕开玩 ----
 (function boot() {

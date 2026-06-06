@@ -715,7 +715,7 @@ body.win-big #machine { filter: drop-shadow(0 0 48px rgba(255,190,60,.75)) brigh
 #machine, #lever { transition: opacity .7s ease, transform .7s cubic-bezier(.2, 1.3, .4, 1), filter .35s; }
 
 /* ===== 分享 ===== */
-#sharebtn {
+#sharebtn, #mutebtn {
   position: fixed; right: 10px; top: max(10px, env(safe-area-inset-top));
   z-index: 20;
   padding: 6px 12px;
@@ -728,7 +728,9 @@ body.win-big #machine { filter: drop-shadow(0 0 48px rgba(255,190,60,.75)) brigh
   box-shadow: inset 0 1px 0 rgba(243,221,142,.18), 0 2px 6px rgba(0,0,0,.5);
   cursor: pointer;
 }
-#sharebtn:active { transform: translateY(1px); color: var(--brass-hi); }
+#sharebtn:active, #mutebtn:active { transform: translateY(1px); color: var(--brass-hi); }
+#mutebtn { right: 84px; }
+#mutebtn.off { color: #5a4a30; text-decoration: line-through; }
 
 #share {
   position: fixed; inset: 0; z-index: 70;
