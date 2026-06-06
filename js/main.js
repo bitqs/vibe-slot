@@ -6,6 +6,7 @@ import { motionFrame } from './art/util.js';
 import { spin as slotSpin, lineOf, judge } from './slots.js';
 import { Reel } from './reels.js';
 import * as audio from './audio.js';
+import { openShare, closeShare, saveShareImage } from './share.js';
 
 const $ = id => document.getElementById(id);
 const reelEls = [...document.querySelectorAll('.reel')];
@@ -440,6 +441,11 @@ setInterval(() => {
     lastActivity = performance.now();
   }
 }, 4000);
+
+// ---- 分享 ----
+$('sharebtn').addEventListener('click', () => { audio.ensure(); openShare(); });
+$('shClose').addEventListener('click', closeShare);
+$('shSave').addEventListener('click', saveShareImage);
 
 // ---- Loading：字体 + 音频预取，灯泡进度，揭幕开玩 ----
 (function boot() {
