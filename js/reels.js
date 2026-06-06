@@ -1,22 +1,22 @@
-// 转轴：词条 ×3 复制成带循环错觉的 strip；pos 单位 = 格
-// spin 匀速滚动，lockTo 用 easeOutBack 滚过头再弹回 —— 机械顿挫感
+// 符号转轴：STRIPS 词条 ×3 复制循环；spin 高速+模糊，lockTo 减速+机械顿挫回弹
+import { SYM_SVG } from './symbols.js';
+
 export class Reel {
-  constructor(el, items) {
+  constructor(el, strip) {
     this.el = el;
-    this.items = items;
-    this.n = items.length;
-    this.strip = el.querySelector('.strip');
+    this.symbols = strip;
+    this.n = strip.length;
+    this.stripEl = el.querySelector('.strip');
     for (let k = 0; k < 3; k++)
-      for (const it of items) {
+      for (const s of strip) {
         const d = document.createElement('div');
         d.className = 'cell';
-        d.textContent = it;
-        this.strip.appendChild(d);
+        d.innerHTML = SYM_SVG[s];
+        this.stripEl.appendChild(d);
       }
     this.pos = Math.floor(Math.random() * this.n);
     this.state = 'idle';
-    // cell/窗口高度是 CSS 常量，缓存避免每帧 offsetHeight 强制 reflow
-    this.cellH = this.strip.children[0].offsetHeight;
+    this.cellH = 66;                  // 与 CSS .cell 同步
     this.winH = el.offsetHeight;
     this.render();
   }
@@ -25,21 +25,24 @@ export class Reel {
     const h = this.cellH, n = this.n;
     const p = ((this.pos % n) + n) % n;
     const y = this.winH / 2 - h / 2 - (p + n) * h;
-    this.strip.style.transform = `translateY(${y}px)`;
+    this.stripEl.style.transform = `translateY(${y}px)`;
   }
 
   spin() {
     this.state = 'spin';
-    this.v = 16 + Math.random() * 5; // 格/秒
+    this.v = 24 + Math.random() * 5; // 格/秒
+    this.el.classList.add('blur');
   }
 
-  lockTo(target, onDone) {
+  // 减速滚向 target（至少再滚 nMin 格），easeOutBack 过冲回弹 = 机械咔哒
+  lockTo(target, onDone, nMin = 4) {
     const n = this.n, cur = Math.ceil(this.pos);
     let d = ((target - cur) % n + n) % n;
-    if (d < 2) d += n; // 至少再滚 2 格，避免急停
+    if (d < nMin) d += n;
     this.from = this.pos;
     this.dist = cur + d - this.pos;
     this.t = 0;
+    this.dur = .65 + this.dist * .022;
     this.state = 'lock';
     this.onDone = onDone;
   }
@@ -48,8 +51,9 @@ export class Reel {
     if (this.state === 'spin') {
       this.pos += this.v * dt;
     } else if (this.state === 'lock') {
-      this.t = Math.min(1, this.t + dt / .85);
-      const x = this.t - 1, c = 1.4;
+      this.t = Math.min(1, this.t + dt / this.dur);
+      if (this.t > .5) this.el.classList.remove('blur');
+      const x = this.t - 1, c = 1.7;
       this.pos = this.from + this.dist * (1 + (c + 1) * x * x * x + c * x * x);
       if (this.t >= 1) {
         this.pos = this.from + this.dist;

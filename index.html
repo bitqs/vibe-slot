@@ -3,24 +3,63 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#0b0b10">
-<title>vibe 老虎机</title>
+<meta name="theme-color" content="#171210">
+<title>VIBE SLOT · 1952</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Limelight&family=Cutive+Mono&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div id="app">
-  <div id="stagewrap">
-    <canvas id="stage"></canvas>
-    <div id="combo"></div>
-  </div>
+<div id="room">
   <div id="machine">
-    <div class="reel"><div class="strip"></div></div>
-    <div class="reel"><div class="strip"></div></div>
-    <div class="reel"><div class="strip"></div></div>
+
+    <div id="crown">
+      <div id="bulbs"></div>
+      <div id="marquee">VIBE&nbsp;SLOT</div>
+      <div id="sub">EST. 1952 · 拉一把试试手气</div>
+    </div>
+
+    <div id="paytable"></div>
+
+    <div id="reelbox">
+      <div class="reel"><div class="strip"></div><div class="shade"></div></div>
+      <div class="reel"><div class="strip"></div><div class="shade"></div></div>
+      <div class="reel"><div class="strip"></div><div class="shade"></div></div>
+      <div id="payline"></div>
+      <div id="glass"></div>
+    </div>
+
+    <div id="deck">
+      <div id="plate">
+        <span id="plate-label">CREDITS</span>
+        <span id="balance">100</span>
+      </div>
+      <div id="coinslot" title="投币口"><i></i></div>
+      <div id="debt"></div>
+    </div>
+
+    <div id="tray">
+      <div id="tray-lip"></div>
+      <div id="tray-coins"></div>
+      <div id="winpop"></div>
+    </div>
+
   </div>
-  <div id="leverzone">
-    <div id="knob"><span>拉</span></div>
-    <div id="hint">下拉 或 点按</div>
+
+  <div id="lever">
+    <div id="slotbase"></div>
+    <div id="arm"><div id="rod"></div><div id="ball"></div></div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div id="jackpot" hidden>
+    <canvas id="poster"></canvas>
+    <div id="jp-card">
+      <div id="jp-title">JACKPOT</div>
+      <div id="jp-amount"></div>
+      <div id="jp-sub">VIBE SLOT · EST. 1952</div>
+    </div>
   </div>
 </div>
 <script type="module" src="js/main.js"></script>
