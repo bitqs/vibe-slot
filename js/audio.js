@@ -81,5 +81,5 @@ export function pad(motion, seed) {
   lfo.connect(lg);
   lg.connect(filt.frequency);
   lfo.start(t);
-  padNodes.push(lfo, g);
+  padNodes.push(lfo, lg, g);
 }

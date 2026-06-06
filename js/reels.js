@@ -15,13 +15,16 @@ export class Reel {
       }
     this.pos = Math.floor(Math.random() * this.n);
     this.state = 'idle';
+    // cell/窗口高度是 CSS 常量，缓存避免每帧 offsetHeight 强制 reflow
+    this.cellH = this.strip.children[0].offsetHeight;
+    this.winH = el.offsetHeight;
     this.render();
   }
 
   render() {
-    const h = this.strip.children[0].offsetHeight, n = this.n;
+    const h = this.cellH, n = this.n;
     const p = ((this.pos % n) + n) % n;
-    const y = this.el.offsetHeight / 2 - h / 2 - (p + n) * h;
+    const y = this.winH / 2 - h / 2 - (p + n) * h;
     this.strip.style.transform = `translateY(${y}px)`;
   }
 
