@@ -39,7 +39,7 @@ body {
 
 /* ===== 机柜 ===== */
 #machine {
-  width: min(86vw, 392px);
+  width: min(80vw, 400px);
   border-radius: 18px 18px 10px 10px;
   padding: 0 14px 14px;
   position: relative;
@@ -94,11 +94,17 @@ body {
   font-family: var(--font-disp);
   font-size: clamp(26px, 8.4vw, 38px);
   letter-spacing: .06em;
-  color: var(--brass-hi);
-  text-shadow:
-    0 1px 0 #8a6d1f, 0 2px 0 #6f5612, 0 3px 1px #4a3a0c,
-    0 4px 10px rgba(0,0,0,.6), 0 0 24px rgba(243,221,142,.25);
+  /* 流金字：渐变填充 + 缓慢流动 */
+  background: linear-gradient(100deg, #b08a1e 15%, var(--brass-hi) 35%, #fffbe8 50%, var(--brass-hi) 65%, #b08a1e 85%);
+  background-size: 230% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 2px 1px #4a3a0c) drop-shadow(0 0 16px rgba(243,221,142,.4));
+  animation: goldflow 5.5s linear infinite;
 }
+@keyframes goldflow { to { background-position: -230% 0; } }
 #sub {
   margin-top: 2px;
   font-size: 10.5px; letter-spacing: .22em;
@@ -109,7 +115,10 @@ body {
 /* ===== 赔率表（做旧纸卡压玻璃下） ===== */
 #paytable {
   margin: 10px 0;
-  padding: 7px 12px;
+  padding: 6px 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 14px;
   border-radius: 6px;
   background:
     radial-gradient(140% 100% at 50% 0%, rgba(255,255,255,.16), transparent 45%),
@@ -126,7 +135,18 @@ body {
   border-radius: 3px;
   transition: background .15s;
 }
-.pt-row:last-child { border-bottom: none; }
+.pt-row:nth-last-child(-n+2) { border-bottom: none; }
+/* 头奖横幅：独占整行，红金压轴 */
+.pt-row.banner {
+  grid-column: 1 / -1;
+  justify-content: center; gap: 14px;
+  margin-bottom: 2px;
+  padding: 3px 2px;
+  border-bottom: 1.5px solid rgba(122,92,20,.55);
+  background: linear-gradient(90deg, transparent, rgba(201,47,36,.1) 25%, rgba(201,47,36,.16) 50%, rgba(201,47,36,.1) 75%, transparent);
+}
+.pt-row.banner .pt-pay { font-size: 16px; }
+.pt-row.banner .pt-syms svg { width: 21px; height: 21px; }
 .pt-syms { display: flex; gap: 3px; align-items: center; }
 .pt-syms svg { width: 17px; height: 17px; display: block; }
 .pt-pay { font-size: 13px; font-weight: bold; letter-spacing: .04em; }
@@ -154,7 +174,7 @@ body {
 .reel {
   position: relative;
   flex: 1;
-  height: 198px;            /* 3 行 × 66 */
+  height: 216px;            /* 3 行 × 72，须与 reels.js cellH 同步 */
   overflow: hidden;
   border-radius: 5px;
   background: linear-gradient(180deg, #cfc3a6, #f4ecd8 28% 72%, #c8bb9c);
@@ -162,10 +182,10 @@ body {
 }
 .strip { will-change: transform; }
 .cell {
-  height: 66px;
+  height: 72px;
   display: flex; align-items: center; justify-content: center;
 }
-.cell svg { width: 48px; height: 48px; display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
+.cell svg { width: 53px; height: 53px; display: block; filter: drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
 .reel.blur .cell svg { filter: blur(2.2px) drop-shadow(0 1px 1px rgba(0,0,0,.25)); }
 /* 圆柱明暗：上下行压暗收缩感 */
 .shade {
@@ -499,4 +519,100 @@ body.win-big #machine { filter: drop-shadow(0 0 48px rgba(255,190,60,.75)) brigh
   border-radius: 50%;
   background: radial-gradient(closest-side, rgba(255,255,255,.85), transparent);
   filter: blur(.5px);
+}
+
+/* ===== v2.2 平衡 + 氛围层 ===== */
+/* 拉杆挂上机柜：黄铜支架 + 居中补偿 */
+#room { padding-left: calc(6px + 34px); } /* 补偿右侧拉杆宽度，让机柜+拉杆整体居中 */
+#lever { margin-left: -14px; align-self: center; }
+#mount {
+  position: absolute; left: -16px; top: 58px;
+  width: 30px; height: 96px;
+  border-radius: 0 8px 8px 0;
+  background: linear-gradient(90deg, #5a4012, var(--brass-dk) 25%, var(--brass) 60%, var(--brass-dk));
+  box-shadow: inset 0 2px 3px rgba(255,248,214,.35), inset 0 -3px 5px rgba(0,0,0,.45), 3px 3px 8px rgba(0,0,0,.55);
+}
+#mount::before, #mount::after {
+  content: '';
+  position: absolute; left: 50%; margin-left: -3px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff3c4, var(--brass-dk) 75%);
+  box-shadow: 0 1px 1px rgba(0,0,0,.6);
+}
+#mount::before { top: 8px; }
+#mount::after { bottom: 8px; }
+#slotbase { top: 30px; bottom: 34px; }
+#pulltag {
+  position: absolute; left: 50%; bottom: 4px;
+  transform: translateX(-50%);
+  font-size: 9px; letter-spacing: .3em; text-indent: .3em;
+  color: var(--brass);
+  text-shadow: 0 1px 0 rgba(0,0,0,.7);
+  animation: pulltag 2.4s ease-in-out infinite;
+}
+@keyframes pulltag { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+
+/* 机器落地：暖光池 */
+#floorglow {
+  position: absolute; left: 6%; right: 6%; bottom: -34px;
+  height: 40px;
+  background: radial-gradient(50% 60% at 50% 40%, rgba(255,190,90,.18), transparent 75%);
+  filter: blur(7px);
+  pointer-events: none;
+}
+
+/* 顶部聚光 */
+#room::before {
+  content: '';
+  position: absolute; left: 50%; top: -4%;
+  width: 130%; height: 64%;
+  transform: translateX(-50%);
+  background: radial-gradient(46% 100% at 50% 0%, rgba(255,214,140,.09), transparent 72%);
+  pointer-events: none;
+}
+
+/* 漂浮尘埃（暗室氛围） */
+#motes { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+#motes i {
+  position: absolute;
+  width: 3px; height: 3px; border-radius: 50%;
+  background: rgba(255,224,150,.35);
+  filter: blur(.6px);
+  animation: mote linear infinite;
+}
+#motes i:nth-child(1) { left: 18%; top: 22%; animation-duration: 11s; }
+#motes i:nth-child(2) { left: 72%; top: 14%; animation-duration: 14s; animation-delay: -4s; width: 2px; height: 2px; }
+#motes i:nth-child(3) { left: 36%; top: 8%;  animation-duration: 17s; animation-delay: -9s; }
+#motes i:nth-child(4) { left: 85%; top: 42%; animation-duration: 12s; animation-delay: -6s; width: 2px; height: 2px; }
+#motes i:nth-child(5) { left: 8%;  top: 55%; animation-duration: 16s; animation-delay: -2s; }
+#motes i:nth-child(6) { left: 58%; top: 30%; animation-duration: 19s; animation-delay: -12s; width: 2px; height: 2px; }
+@keyframes mote {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  12%  { opacity: .6; }
+  88%  { opacity: .25; }
+  100% { transform: translate(26px, 64vh); opacity: 0; }
+}
+
+/* 转轴窗内灯：滚动时点亮 */
+#reelbox .reel { transition: box-shadow .4s; }
+#reelbox.lit .reel {
+  box-shadow: inset 0 0 26px rgba(255,200,90,.3), inset 0 0 0 1px rgba(0,0,0,.35);
+}
+
+/* 小屏：补偿收紧 */
+@media (max-width: 420px) {
+  #room { padding-left: calc(6px + 22px); }
+  #lever { margin-left: -10px; }
+}
+
+/* 托盘钢印（空盘不显得是黑洞） */
+#tray::after {
+  content: '· VIBE SLOT · 1952 ·';
+  position: absolute; left: 0; right: 0; top: 52%;
+  transform: translateY(-50%);
+  text-align: center;
+  font-size: 10px; letter-spacing: .34em; text-indent: .34em;
+  color: rgba(255,236,180,.13);
+  text-shadow: 0 -1px 0 rgba(0,0,0,.8), 0 1px 0 rgba(255,255,255,.05);
+  pointer-events: none;
 }

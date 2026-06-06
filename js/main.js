@@ -22,7 +22,7 @@ function persist() { try { localStorage.setItem('vibeslot', JSON.stringify(save)
 // ---- 赔率表 ----
 for (const p of PAYTABLE) {
   const row = document.createElement('div');
-  row.className = 'pt-row' + (p.id === 'jackpot' ? ' gold' : '');
+  row.className = 'pt-row' + (p.id === 'jackpot' ? ' gold banner' : '');
   row.dataset.id = p.id;
   const syms = p.match.map(m => m ? SYM_SVG[m] : '<span style="width:17px;text-align:center;opacity:.4">·</span>').join('');
   row.innerHTML = `<span class="pt-syms">${syms}</span><span class="pt-pay">${p.pay}</span>`;
@@ -139,6 +139,7 @@ function startSpin(forcedStops) {
   const drama = line[0] === 'S' && line[1] === 'S';
 
   setTimeout(() => audio.whirrStart(), 60);
+  $('reelbox').classList.add('lit');
   reels.forEach(r => r.spin());
 
   let locked = 0;
@@ -156,6 +157,7 @@ function startSpin(forcedStops) {
         m.classList.add('bump');
         if (++locked === 3) {
           audio.whirrStop();
+          $('reelbox').classList.remove('lit');
           settle(result);
         }
       }, (i === 2 && drama) ? 9 : 4);

@@ -16,7 +16,7 @@ export class Reel {
       }
     this.pos = Math.floor(Math.random() * this.n);
     this.state = 'idle';
-    this.cellH = 66;                  // 与 CSS .cell 同步
+    this.cellH = 72;                  // 与 CSS .cell 同步
     this.winH = el.offsetHeight;
     this.render();
   }
