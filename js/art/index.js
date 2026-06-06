@@ -4,6 +4,8 @@ import * as gridwave from './gridwave.js';
 import * as branches from './branches.js';
 import * as terrain from './terrain.js';
 import * as orbits from './orbits.js';
+import * as charrain from './charrain.js';
+import * as glassbars from './glassbars.js';
 
 // 顺序必须对齐 config.js ALGO_NAMES
-export const ALGOS = [flowfield, nebula, gridwave, branches, terrain, orbits];
+export const ALGOS = [flowfield, nebula, gridwave, branches, terrain, orbits, charrain, glassbars];

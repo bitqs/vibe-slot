@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import { ALGOS } from '../js/art/index.js';
+import { ALGO_NAMES } from '../js/config.js';
 
 test('gen 确定性：同 seed 同场景，不同 seed 不同', () => {
   for (const a of ALGOS) {
@@ -17,4 +18,9 @@ test('算法接口齐全', () => {
     assert.equal(typeof a.draw, 'function');
     assert.equal(typeof a.fade, 'number');
   }
+});
+
+test('注册表 8 个且顺序对齐 ALGO_NAMES', () => {
+  assert.equal(ALGOS.length, 8);
+  assert.deepEqual(ALGOS.map(a => a.name), ALGO_NAMES);
 });
