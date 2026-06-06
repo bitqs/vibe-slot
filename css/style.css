@@ -399,3 +399,104 @@ body {
   #lever { width: 48px; }
   #ball { width: 34px; height: 34px; margin-left: -17px; }
 }
+
+/* ===== v2.1 炫酷层 ===== */
+/* 顶冠玻璃扫光 */
+#shine {
+  position: absolute; inset: 0; overflow: hidden;
+  border-radius: 18px 18px 0 0;
+  pointer-events: none;
+}
+#shine::after {
+  content: '';
+  position: absolute; top: -20%; bottom: -20%; width: 34%; left: -45%;
+  background: linear-gradient(100deg, transparent, rgba(255,248,214,.16) 45%, rgba(255,255,255,.3) 50%, rgba(255,248,214,.16) 55%, transparent);
+  transform: skewX(-12deg);
+  animation: shinesweep 4.8s ease-in-out infinite;
+}
+@keyframes shinesweep { 0%, 60% { left: -45%; } 90%, 100% { left: 115%; } }
+
+/* 中奖光环（套在机柜外） */
+#machine { transition: filter .35s; }
+body.win-sm #machine { filter: drop-shadow(0 0 26px rgba(255,190,60,.4)); }
+body.win-big #machine { filter: drop-shadow(0 0 48px rgba(255,190,60,.75)) brightness(1.06); }
+
+/* 机柜锁定顿挫 */
+#machine.bump { animation: bump .16s; }
+@keyframes bump { 40% { transform: translateY(2.5px); } }
+
+/* payline 爆闪 */
+#payline.flash {
+  opacity: 1; height: 3.5px;
+  box-shadow: 0 0 16px 3px rgba(255,210,90,.9);
+  animation: paylineflash .42s ease-in-out 4;
+}
+@keyframes paylineflash { 50% { filter: brightness(2); } }
+
+/* 中线中奖符号弹跳发光 */
+.cell.pop svg {
+  animation: sympop .5s cubic-bezier(.2, 2.2, .4, 1) 3 alternate;
+  filter: drop-shadow(0 0 9px rgba(255,210,90,.95)) drop-shadow(0 1px 1px rgba(0,0,0,.25));
+}
+@keyframes sympop { to { transform: scale(1.22); } }
+
+/* 托盘光芒轮 */
+#rays {
+  position: absolute; inset: -55% -20%;
+  pointer-events: none; opacity: 0;
+  background: repeating-conic-gradient(from 0deg, rgba(255,214,90,.25) 0deg 8deg, transparent 8deg 24deg);
+  -webkit-mask: radial-gradient(circle at 50% 62%, #000 0%, transparent 60%);
+  mask: radial-gradient(circle at 50% 62%, #000 0%, transparent 60%);
+}
+#rays.on { animation: raysspin 2.2s ease-out; }
+@keyframes raysspin {
+  0% { opacity: 0; transform: rotate(0); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(150deg); }
+}
+
+/* 屏闪 */
+#flash {
+  position: fixed; inset: 0; pointer-events: none; z-index: 40; opacity: 0;
+  background: radial-gradient(120% 100% at 50% 45%, rgba(255,226,140,.55), rgba(255,190,60,.16) 55%, transparent 78%);
+}
+#flash.go { animation: flashgo .5s ease-out; }
+#flash.go.big { animation: flashgo .5s ease-out 3; }
+@keyframes flashgo { 12% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 抛物线金币 */
+.flycoin {
+  position: fixed; width: 18px; height: 18px; border-radius: 50%;
+  z-index: 35; pointer-events: none;
+  background: radial-gradient(circle at 36% 30%, #ffe9a0, #e3b33c 52%, #9a7115);
+  box-shadow: inset 0 0 0 1.5px rgba(122,92,20,.65), 0 2px 4px rgba(0,0,0,.5);
+  animation: flyarc .78s cubic-bezier(.3, .1, .62, 1) both;
+}
+@keyframes flyarc {
+  0% { transform: translate(0, 0) rotate(0) scale(.7); opacity: 0; }
+  10% { opacity: 1; }
+  55% { transform: translate(calc(var(--dx) * .6), -72px) rotate(200deg) scale(1.06); }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(430deg) scale(.9); opacity: 1; }
+}
+
+/* JACKPOT 光轮 */
+#jp-rays {
+  position: absolute; left: 50%; top: 22%;
+  width: 150vmax; height: 150vmax;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: repeating-conic-gradient(rgba(255,214,90,.13) 0 6deg, transparent 6deg 18deg);
+  -webkit-mask: radial-gradient(circle, #000 0%, transparent 56%);
+  mask: radial-gradient(circle, #000 0%, transparent 56%);
+  animation: jprays 16s linear infinite;
+}
+@keyframes jprays { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+/* 拉杆球头高光 */
+#ball::after {
+  content: '';
+  position: absolute; left: 18%; top: 11%; width: 34%; height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255,255,255,.85), transparent);
+  filter: blur(.5px);
+}

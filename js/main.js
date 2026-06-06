@@ -150,6 +150,10 @@ function startSpin(forcedStops) {
         reelEls[i].classList.remove('hit');
         void reelEls[i].offsetWidth;
         reelEls[i].classList.add('hit');
+        const m = $('machine');
+        m.classList.remove('bump');
+        void m.offsetWidth;
+        m.classList.add('bump');
         if (++locked === 3) {
           audio.whirrStop();
           settle(result);
@@ -180,10 +184,12 @@ function settle({ win, nearMiss }) {
 
   if (win.id === 'jackpot') { jackpot(win); return; }
 
+  const big = tier <= 2; // bar3/bell3 以上算大奖
   audio.winBells(Math.max(2, 7 - tier));
   audio.coinsCascade(Math.min(18, Math.ceil(win.pay / 10)));
   dropCoins(Math.min(24, Math.max(3, Math.round(win.pay / 8))));
-  bulbsFlash(tier <= 2 ? 'chase' : 'flash', tier <= 2 ? 2600 : 1500);
+  bulbsFlash(big ? 'chase' : 'flash', big ? 2600 : 1500);
+  winFx(win, big);
   $('winpop').textContent = `+${win.pay}`;
   $('winpop').classList.remove('show');
   void $('winpop').offsetWidth;
@@ -191,11 +197,61 @@ function settle({ win, nearMiss }) {
   countTo(save.coins);
 }
 
+// ---- 中奖视觉爆点：payline 爆闪 + 符号弹跳 + 光芒轮 + 屏闪 + 抛物线金币 + 机柜光环 ----
+function winFx(win, big) {
+  const pl = $('payline');
+  pl.classList.remove('flash');
+  void pl.offsetWidth;
+  pl.classList.add('flash');
+  setTimeout(() => pl.classList.remove('flash'), 1800);
+
+  // 中线符号弹跳（只点亮参与中奖的轴：樱桃按左起连数）
+  const litReels = win.id === 'cherry1' ? 1 : win.id === 'cherry2' ? 2 : 3;
+  document.querySelectorAll('.cell.pop').forEach(c => c.classList.remove('pop'));
+  for (let i = 0; i < litReels; i++) reels[i].midCell()?.classList.add('pop');
+  setTimeout(() => document.querySelectorAll('.cell.pop').forEach(c => c.classList.remove('pop')), 1700);
+
+  const rays = $('rays');
+  rays.classList.remove('on');
+  void rays.offsetWidth;
+  rays.classList.add('on');
+
+  const fl = $('flash');
+  fl.classList.remove('go', 'big');
+  void fl.offsetWidth;
+  fl.classList.add('go');
+  if (big) fl.classList.add('big');
+
+  document.body.classList.add(big ? 'win-big' : 'win-sm');
+  setTimeout(() => document.body.classList.remove('win-sm', 'win-big'), big ? 2600 : 1400);
+
+  // 抛物线金币：从转轴窗飞向托盘
+  const rb = $('reelbox').getBoundingClientRect();
+  const tr = $('tray').getBoundingClientRect();
+  const n = Math.min(16, Math.max(4, Math.round(win.pay / 12)));
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'flycoin';
+      c.style.left = rb.left + rb.width * (0.3 + Math.random() * 0.4) + 'px';
+      c.style.top = rb.top + rb.height * 0.5 + 'px';
+      c.style.setProperty('--dx', (Math.random() - .5) * 180 + 'px');
+      c.style.setProperty('--dy', tr.top + 20 - (rb.top + rb.height * 0.5) + Math.random() * 24 + 'px');
+      document.body.appendChild(c);
+      c.addEventListener('animationend', () => c.remove());
+    }, i * 55);
+  }
+}
+
 // ---- JACKPOT 头奖海报（复用 v1 生成艺术） ----
 let posterRaf = 0;
 function jackpot(win) {
   audio.jackpotFanfare();
   bulbsFlash('chase', 0);
+  const fl = $('flash');
+  fl.classList.remove('go', 'big');
+  void fl.offsetWidth;
+  fl.classList.add('go', 'big');
   const jp = $('jackpot');
   jp.hidden = false;
   $('jp-amount').textContent = `+${win.pay}`;

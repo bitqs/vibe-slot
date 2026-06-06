@@ -28,6 +28,13 @@ export class Reel {
     this.stripEl.style.transform = `translateY(${y}px)`;
   }
 
+  // 当前停在中线（payline）的 cell 元素
+  midCell() {
+    const n = this.n;
+    const p = ((Math.round(this.pos) % n) + n) % n;
+    return this.stripEl.children[p + n];
+  }
+
   spin() {
     this.state = 'spin';
     this.v = 24 + Math.random() * 5; // 格/秒
