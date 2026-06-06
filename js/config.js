@@ -18,7 +18,7 @@ export const PAYTABLE = [
   { id: 'bar3',    match: ['R', 'R', 'R'],   pay: 400 },
   { id: 'bell3',   match: ['B', 'B', 'B'],   pay: 150 },
   { id: 'melon3',  match: ['M', 'M', 'M'],   pay: 90 },
-  { id: 'lemon3',  match: ['L', 'L', 'L'],   pay: 70 },
+  { id: 'lemon3',  match: ['L', 'L', 'L'],   pay: 60 },
   { id: 'cherry3', match: ['C', 'C', 'C'],   pay: 30 },
   { id: 'cherry2', match: ['C', 'C', null],  pay: 15 },
   { id: 'cherry1', match: ['C', null, null], pay: 3 },
@@ -31,7 +31,7 @@ export const ECON = {
 };
 
 export const PITY = {
-  losses: 6,    // 连续空手 N 次后下次必中小奖（构造樱桃停位）
+  losses: 8,    // 连续空手 N 次后下次必中小奖（构造樱桃停位）
 };
 
 // 时序（ms）

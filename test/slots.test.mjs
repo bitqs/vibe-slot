@@ -39,7 +39,8 @@ test('精确 RTP/命中率：枚举全部 8000 组合', () => {
       }
   const rtp = payout / (n * n * n * ECON.bet);
   const hit = hits / (n * n * n);
-  assert.ok(rtp > .92 && rtp < .97, `理论 RTP ${rtp.toFixed(4)} 出带`);
+  // 理论值（不含 pity）；pity 实效约 +3pts，目标实效 ≈94%（build/sim.mjs 验证）
+  assert.ok(rtp > .90 && rtp < .95, `理论 RTP ${rtp.toFixed(4)} 出带`);
   assert.ok(hit > .25 && hit < .32, `命中率 ${hit.toFixed(4)} 出带`);
 });
 
